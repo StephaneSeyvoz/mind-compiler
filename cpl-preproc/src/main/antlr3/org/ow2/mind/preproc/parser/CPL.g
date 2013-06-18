@@ -166,7 +166,7 @@ protected methDef returns [StringBuilder res]
 	;
 		
 protected serverMethDef returns [StringBuilder res = new StringBuilder()]
-@init{String tmp = ""; String itfIdx = null;}
+@init{String tmp = ""; String itfIdx = null; StringBuilder body = new StringBuilder();}
   : METH ws1=ws* '(' ws2=ws* id=ID ws3=ws* ( '[' ws4=ws* INT ws5=ws* ']' ws6=ws* { itfIdx=$INT.text; } )? ',' ws7=ws* meth=ID ws8=ws* ')' ws9=ws*
       (
         e = ws* ')' { tmp += wstext($e.text) + ")"; }
@@ -192,19 +192,56 @@ protected serverMethDef returns [StringBuilder res = new StringBuilder()]
       }
     }
     (
-      paramsDef ws10=ws* { $res.append($paramsDef.res).append(wstext($ws10.text)); }
+      paramsDef ws10=ws* { body.append($paramsDef.res).append(wstext($ws10.text)); }
+      
       (
          '{'
           {
             if (!singletonMode) 
-              $res.append("{ CHECK_CONTEXT_PTR "); 
+              body.append("{ CHECK_CONTEXT_PTR "); 
             else
-              $res.append("{");
+              body.append("{");
             if (headerOut != null) headerOut.println("#define INTERFACE_METHOD_" + $id.text + "_" + $meth.text + "_IMPLEMENTED"); 
           }
-      )?
+          
+          ( curlies    { body.append($curlies.res); }
+            | methDef    { body.append($methDef.res); }
+            | methCall    { body.append($methCall.res); }
+            | attAccess     { body.append($attAccess.res); }
+            | privateAccess   { body.append($privateAccess.res); }
+            | structDecl    { body.append($structDecl.res); }
+            | methPtrDef    { body.append($methPtrDef.res); }
+            | nestedE = ~('{' | '}' | METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR
+                          | GET_MY_INTERFACE | BIND_MY_INTERFACE | IS_BOUND)
+                          { body.append($nestedE.text); }
+          )*
+         '}' { body.append("}"); }
+          
+      )? { $res.append(body.toString());
+           try {
+            cplChecker.storeServerMethDefIfInlineAnno($id, itfIdx, $meth, getSourceFile(), body);
+           } catch (ADLException e2) {
+            // do nothing
+           }
+         }
     )?
     ;
+
+protected curlies returns [StringBuilder res = new StringBuilder()] :
+  '{' { $res.append("{"); }
+    ( curlies
+      | methDef    { $res.append($methDef.res); }
+      | methCall    { $res.append($methCall.res); }
+      | attAccess     { $res.append($attAccess.res); }
+      | privateAccess   { $res.append($privateAccess.res); }
+      | structDecl    { $res.append($structDecl.res); }
+      | methPtrDef    { $res.append($methPtrDef.res); }
+      | allOthers = ~('{' | '}' | METH | CALL | ATTR | PRIVATE | STRUCT | METH_PTR | CALL_PTR
+                          | GET_MY_INTERFACE | BIND_MY_INTERFACE | IS_BOUND)
+                          { $res.append($allOthers.text); }
+    )*
+  '}' { $res.append("}"); }
+  ;
 
 protected privateMethDef returns [StringBuilder res = new StringBuilder()]
 @init{String tmp = "";}

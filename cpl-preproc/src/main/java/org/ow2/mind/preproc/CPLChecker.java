@@ -22,6 +22,7 @@
 
 package org.ow2.mind.preproc;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +51,7 @@ import org.ow2.mind.adl.membrane.ast.ControllerInterface;
 import org.ow2.mind.error.ErrorManager;
 import org.ow2.mind.idl.ast.IDLASTHelper;
 import org.ow2.mind.idl.ast.InterfaceDefinition;
+import org.ow2.mind.idl.ast.Method;
 
 public class CPLChecker {
   protected final Definition          definition;
@@ -142,6 +144,9 @@ public class CPLChecker {
           locator(methName, sourceFile), itfName.getText(), methName.getText());
     }
 
+    // -------------------------
+    // Missing methods checking
+
     // to avoid rewriting the grammar
     StringBuilder idxSB = null;
     Integer idxInt = null;
@@ -162,8 +167,109 @@ public class CPLChecker {
     else
       ImplementedMethodsHelper.addCollectionImplementedMethod(itf, idxInt,
           methName.getText());
+    // -------------------------
 
   }
+
+  // SSZ - BEGIN Inline Optim
+  /**
+   * @param itfName
+   * @param itfIdx
+   * @param methName
+   * @param sourceFile
+   * @param body
+   * @throws ADLException
+   */
+  @SuppressWarnings("unchecked")
+  public void storeServerMethDefIfInlineAnno(final Token itfName,
+      final String itfIdx, final Token methName, final String sourceFile,
+      final StringBuilder body) throws ADLException {
+
+    if (definition == null) {
+      // Add this condition so that the testNG will not throw exceptions
+      // (stand-alone node)
+      return;
+    }
+
+    // all previous checks from serverMethDef have already been done
+    final Interface itf = ASTHelper.getInterface(definition, itfName.getText());
+
+    if (itfIdx != null) {
+      logger.severe("Cannot inline collection methods ! - Skip");
+      return;
+    }
+
+    // ----------------------------------------
+    // Inline checking and method body storage
+
+    final Object isInline = itf.astGetDecoration("is-inline");
+
+    if ((isInline != null) && (isInline instanceof Boolean)
+        && ((Boolean) isInline).equals(Boolean.TRUE)) {
+
+      // Then we need to remember the method body for its inline variation
+      // declaration in the .inc file
+
+      // For debug purposes
+      logger.info("CPLChecker - Inline - METH(" + itfName.getText() + ", "
+          + methName.getText() + ") body content:");
+      logger.info(body.toString());
+
+      // already loaded and checked by serverMethDef
+      final InterfaceDefinition itfDef = InterfaceDefinitionDecorationHelper
+          .getResolvedInterfaceDefinition((TypeInterface) itf, null, null);
+      final Method currMethod = IDLASTHelper.getMethod(itfDef,
+          methName.getText());
+      if (currMethod == null) {
+        errorManager.logError(MPPErrors.UNKNOWN_METHOD,
+            locator(methName, sourceFile), itfName.getText(),
+            methName.getText());
+      }
+
+      List<String> fullInlineMethodsImpls = null;
+
+      // TODO: the currMethod.getType.toString() is bad: fix and find the good
+      // string
+      final String newInlineMethodBody = currMethod.getType().toString()
+          + " __component_" + definition.getName().replace(".", "_") + "_"
+          + itfName.getText() + "_" + methName.getText() + "-inline"
+          + body.toString();
+
+      boolean isFirst = true;
+
+      final Object bindingSources = itf.astGetDecoration("inline-sources");
+      if (bindingSources instanceof List) { // should be anyway...
+        final List<Interface> bindingSourcesList = (List<Interface>) bindingSources;
+        for (final Interface currSourceItf : bindingSourcesList) {
+
+          // as all will reference the same List, we want to "add" to be done
+          // only once but the list to be used everywhere
+          if (isFirst) {
+            final Object methBodiesObject = currSourceItf
+                .astGetDecoration("inline-methods-bodies");
+            if (methBodiesObject == null)
+              fullInlineMethodsImpls = new ArrayList<String>();
+            else if (methBodiesObject instanceof List)
+              fullInlineMethodsImpls = (List<String>) methBodiesObject;
+            else
+              return; // TODO: LOG ERROR
+
+            fullInlineMethodsImpls.add(newInlineMethodBody);
+
+            isFirst = false;
+          }
+
+          currSourceItf.astSetDecoration("inline-methods-bodies",
+              fullInlineMethodsImpls);
+        }
+      }
+
+      @SuppressWarnings("unused")
+      final Object bindingSources2 = itf.astGetDecoration("inline-sources");
+    }
+  }
+
+  // SSZ: END Inline Optim
 
   public void itfMethCall(final Token itfName, final Token methName,
       final String sourceFile) throws ADLException {
