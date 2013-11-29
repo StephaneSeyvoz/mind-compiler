@@ -1,8 +1,4 @@
 
-/* -----------------------------------------------------------------------------
-   Implementation of the primitive importidl.Client.
-   -------------------------------------------------------------------------- */
-
 int METH(entryPoint, main)(int argc, char **argv) {
 
 	int res = 2;
