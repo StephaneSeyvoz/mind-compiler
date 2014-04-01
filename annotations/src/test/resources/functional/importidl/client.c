@@ -1,5 +1,5 @@
 
-int METH(entryPoint, main)(int argc, char **argv) {
+int METH(main, main)(int argc, char **argv) {
 
 	int res = 2;
 
