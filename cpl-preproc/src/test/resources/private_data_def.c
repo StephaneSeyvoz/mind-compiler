@@ -11,7 +11,7 @@
 #define privateArray 2
 
 #if (COMPONENT_NAME == extern)
-// do nothing, and cleanup
+/* do nothing, and cleanup */
 #undef extern
 #elif (COMPONENT_NAME == privateArray)
 /*
@@ -30,7 +30,7 @@ typedef struct {
 
 SINGLETON_PRIVATE_DATA_T PRIVATE;
 
-// Note: we #undef privateArray in the end just in case
+/* Note: we #undef privateArray in the end just in case */
 #else
 /*
  * Duplicate-definition bug fix for some families of compilers (such as IAR)
@@ -46,8 +46,8 @@ typedef struct {
 }  SINGLETON_PRIVATE_DATA_T;
 #endif /* SINGLETON_PRIVATE_DATA */
 
-// cleanup and COMPONENT_NAME being used to calculate PRIVATE we need to reset it
-// otherwise the variable would be called '__component_2_private_data' instead of '__component_privateArray_private_data'
+/* cleanup and COMPONENT_NAME being used to calculate PRIVATE we need to reset it
+   otherwise the variable would be called '__component_2_private_data' instead of '__component_privateArray_private_data' */
 #undef privateArray
 
 SINGLETON_PRIVATE_DATA_T PRIVATE;
