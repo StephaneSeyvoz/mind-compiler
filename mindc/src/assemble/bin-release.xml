@@ -44,53 +44,9 @@
     </dependencySets>
     <fileSets>
         <fileSet>
-            <directory>src/assemble/resources/examples</directory>
+            <directory>src/assemble/resources/</directory>
             <filtered>false</filtered>
-            <outputDirectory>examples</outputDirectory>
-            <fileMode>0644</fileMode>
+            <outputDirectory>.</outputDirectory>
         </fileSet>
     </fileSets>
-    <files>
-        <file>
-            <source>src/assemble/resources/jar_launcher</source>
-            <fileMode>0755</fileMode>
-            <outputDirectory>bin</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>src/assemble/resources/jar_launcher.bat</source>
-            <fileMode>0755</fileMode>
-            <outputDirectory>bin</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>src/assemble/resources/mindc</source>
-            <fileMode>0755</fileMode>
-            <outputDirectory>bin</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>src/assemble/resources/mindc.bat</source>
-            <fileMode>0755</fileMode>
-            <outputDirectory>bin</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>src/assemble/resources/README.txt</source>
-            <fileMode>0644</fileMode>
-            <outputDirectory></outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>src/assemble/resources/ext/README.txt</source>
-            <fileMode>0644</fileMode>
-            <outputDirectory>ext</outputDirectory>
-            <filtered>true</filtered>
-        </file>
-        <file>
-            <source>LICENSES.txt</source>
-            <fileMode>0644</fileMode>
-            <outputDirectory></outputDirectory>
-        </file>
-    </files>
 </assembly>
