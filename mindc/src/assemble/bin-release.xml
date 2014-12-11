@@ -49,4 +49,11 @@
             <outputDirectory>.</outputDirectory>
         </fileSet>
     </fileSets>
+    <files>
+        <file>
+            <source>LICENSES.txt</source>
+            <fileMode>0644</fileMode>
+            <outputDirectory></outputDirectory>
+        </file>
+    </files>
 </assembly>
