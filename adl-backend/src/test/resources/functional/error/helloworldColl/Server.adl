@@ -1,7 +1,0 @@
-
-primitive error.helloworldColl.Server {
-  
-  provides Service as s[2] ;
-  
-  source server.c;
-}

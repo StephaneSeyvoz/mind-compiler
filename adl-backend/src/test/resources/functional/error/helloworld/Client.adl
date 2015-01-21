@@ -1,7 +1,0 @@
-primitive error.helloworld.Client {
-  
-  provides Main as main;
-  requires Service as sa ;
-  
-  source client.c;
-}

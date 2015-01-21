@@ -1,3 +1,0 @@
-composite error.helloworld.HelloworldApplication 
-    extends GenericApplication<Helloworld> {
-}

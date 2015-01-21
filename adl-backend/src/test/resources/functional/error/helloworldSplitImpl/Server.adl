@@ -1,8 +1,0 @@
-
-primitive error.helloworldSplitImpl.Server {
-  
-  provides Service as s ;
-  
-  source server1.c;
-  source server2.c;
-}

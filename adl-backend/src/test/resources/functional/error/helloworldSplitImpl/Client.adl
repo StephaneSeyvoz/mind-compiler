@@ -1,7 +1,0 @@
-primitive error.helloworldSplitImpl.Client {
-  
-  provides Main as main;
-  requires Service as sa ;
-  
-  source client.c;
-}
